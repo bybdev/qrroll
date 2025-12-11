@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Wedding } from '@/lib/types/database';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { LogOut, Plus, Calendar, Image } from 'lucide-react';
+import { LogOut, Plus, Calendar, Image, QrCode } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -140,6 +140,14 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => router.push(`/admin/dashboard/qr/${wedding.id}`)}
+                    >
+                      <QrCode className="w-4 h-4 mr-1" />
+                      QR
+                    </Button>
                     <Button
                       size="sm"
                       onClick={() => router.push(`/admin/dashboard/${wedding.id}`)}
