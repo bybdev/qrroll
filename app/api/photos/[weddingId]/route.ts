@@ -3,10 +3,10 @@ import { supabase } from '@/lib/supabase/client';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { weddingId: string } }
+  { params }: { params: Promise<{ weddingId: string }> }
 ) {
   try {
-    const { weddingId } = params;
+    const { weddingId } = await params;
 
     // Fotoğrafları getir (yeniden eskiye)
     const { data, error } = await supabase
