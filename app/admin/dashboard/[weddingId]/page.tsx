@@ -19,6 +19,7 @@ export default function WeddingDetailPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     fetchWedding();
@@ -56,7 +57,41 @@ export default function WeddingDetailPage() {
   };
 
   const handleDownloadAll = async () => {
-    alert('ZIP indirme özelliği henüz eklenmedi. Yakında eklenecek!');
+    if (photos.length === 0) {
+      alert('İndirilecek fotoğraf yok!');
+      return;
+    }
+
+    const confirmDownload = confirm(`${photos.length} fotoğrafı ZIP olarak indirmek istiyor musunuz?`);
+    if (!confirmDownload) return;
+
+    setDownloading(true);
+
+    try {
+      const response = await fetch('/api/download-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weddingId }),
+      });
+
+      if (!response.ok) throw new Error('ZIP oluşturulamadı');
+
+      // ZIP'i indir
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${wedding?.slug}-photos.zip`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      alert('Fotoğraflar başarıyla indirildi!');
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('İndirme başarısız oldu. Lütfen tekrar deneyin.');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleDeleteWedding = async () => {
@@ -135,9 +170,12 @@ export default function WeddingDetailPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadAll} disabled={photos.length === 0}>
+              <Button 
+                onClick={handleDownloadAll} 
+                disabled={photos.length === 0 || downloading}
+              >
                 <Download className="w-4 h-4 mr-2" />
-                Tümünü İndir
+                {downloading ? 'İndiriliyor...' : 'Tümünü İndir'}
               </Button>
               <Button variant="danger" onClick={handleDeleteWedding} disabled={deleting}>
                 <Trash2 className="w-4 h-4 mr-2" />
