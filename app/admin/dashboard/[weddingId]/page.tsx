@@ -6,9 +6,42 @@ import { supabase } from '@/lib/supabase/client';
 import { Wedding, Photo } from '@/lib/types/database';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ArrowLeft, Download, Trash2, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Download, Trash2, Image as ImageIcon, Camera, Heart } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
+
+// Fotoğraf yükleme fonksiyonu
+const uploadWeddingPhoto = async (
+  weddingId: string,
+  file: File,
+  type: 'cover' | 'profile' | 'background'
+): Promise<string> => {
+  // Supabase Storage'a yükle
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${weddingId}/${type}_${Date.now()}.${fileExt}`;
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from('wedding-photos')
+    .upload(fileName, file);
+
+  if (uploadError) throw uploadError;
+
+  // Public URL al
+  const { data: urlData } = supabase.storage
+    .from('wedding-photos')
+    .getPublicUrl(fileName);
+
+  // Database'i güncelle
+  const updateField = `${type}_photo_url`;
+  const { error: dbError } = await supabase
+    .from('weddings')
+    .update({ [updateField]: urlData.publicUrl })
+    .eq('id', weddingId);
+
+  if (dbError) throw dbError;
+
+  return urlData.publicUrl;
+};
 
 export default function WeddingDetailPage() {
   const router = useRouter();
@@ -20,6 +53,7 @@ export default function WeddingDetailPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     fetchWedding();
@@ -56,6 +90,27 @@ export default function WeddingDetailPage() {
     }
   };
 
+  const handlePhotoUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: 'cover' | 'profile' | 'background'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPhoto(type);
+
+    try {
+      await uploadWeddingPhoto(weddingId, file, type);
+      await fetchWedding(); // Refresh
+      alert('Fotoğraf başarıyla yüklendi!');
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Fotoğraf yüklenemedi. Lütfen tekrar deneyin.');
+    } finally {
+      setUploadingPhoto(null);
+    }
+  };
+
   const handleDownloadAll = async () => {
     if (photos.length === 0) {
       alert('İndirilecek fotoğraf yok!');
@@ -76,7 +131,6 @@ export default function WeddingDetailPage() {
 
       if (!response.ok) throw new Error('ZIP oluşturulamadı');
 
-      // ZIP'i indir
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -151,7 +205,7 @@ export default function WeddingDetailPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Wedding Info */}
         <Card className="mb-6">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
                 {wedding.bride_name} & {wedding.groom_name}
@@ -182,6 +236,107 @@ export default function WeddingDetailPage() {
                 {deleting ? 'Siliniyor...' : 'Düğünü Sil'}
               </Button>
             </div>
+          </div>
+
+          {/* Fotoğraf Yönetimi */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Düğün Fotoğrafları Yönetimi
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Cover Photo */}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <p className="text-sm font-medium text-gray-700 mb-2 text-center">
+                  Cover Photo (Arka Plan)
+                </p>
+                {wedding.cover_photo_url ? (
+                  <img
+                    src={wedding.cover_photo_url}
+                    alt="Cover"
+                    className="w-full h-32 object-cover rounded mb-2"
+                  />
+                ) : (
+                  <div className="w-full h-32 bg-gray-100 rounded mb-2 flex items-center justify-center">
+                    <Camera className="w-8 h-8 text-gray-400" />
+                  </div>
+                )}
+                <label className="cursor-pointer block text-center">
+                  <span className="text-sm text-pink-600 hover:text-pink-700 font-medium">
+                    {uploadingPhoto === 'cover' ? 'Yükleniyor...' : 'Fotoğraf Yükle'}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handlePhotoUpload(e, 'cover')}
+                    disabled={uploadingPhoto !== null}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Profile Photo */}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <p className="text-sm font-medium text-gray-700 mb-2 text-center">
+                  Profile Photo (Çift Fotoğrafı)
+                </p>
+                {wedding.profile_photo_url ? (
+                  <img
+                    src={wedding.profile_photo_url}
+                    alt="Profile"
+                    className="w-full h-32 object-cover rounded mb-2"
+                  />
+                ) : (
+                  <div className="w-full h-32 bg-gray-100 rounded mb-2 flex items-center justify-center">
+                    <Heart className="w-8 h-8 text-gray-400" />
+                  </div>
+                )}
+                <label className="cursor-pointer block text-center">
+                  <span className="text-sm text-pink-600 hover:text-pink-700 font-medium">
+                    {uploadingPhoto === 'profile' ? 'Yükleniyor...' : 'Fotoğraf Yükle'}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handlePhotoUpload(e, 'profile')}
+                    disabled={uploadingPhoto !== null}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Background Photo */}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <p className="text-sm font-medium text-gray-700 mb-2 text-center">
+                  Background Photo (Albüm Arkaplanı)
+                </p>
+                {wedding.background_photo_url ? (
+                  <img
+                    src={wedding.background_photo_url}
+                    alt="Background"
+                    className="w-full h-32 object-cover rounded mb-2"
+                  />
+                ) : (
+                  <div className="w-full h-32 bg-gray-100 rounded mb-2 flex items-center justify-center">
+                    <ImageIcon className="w-8 h-8 text-gray-400" />
+                  </div>
+                )}
+                <label className="cursor-pointer block text-center">
+                  <span className="text-sm text-pink-600 hover:text-pink-700 font-medium">
+                    {uploadingPhoto === 'background' ? 'Yükleniyor...' : 'Fotoğraf Yükle'}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handlePhotoUpload(e, 'background')}
+                    disabled={uploadingPhoto !== null}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-3">
+              💡 Bu fotoğraflar misafirlerin gördüğü sayfada kullanılır.
+            </p>
           </div>
         </Card>
 

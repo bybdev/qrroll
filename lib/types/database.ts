@@ -7,6 +7,9 @@ export interface Wedding {
   wedding_date: string;
   created_at: string;
   is_active: boolean;
+  cover_photo_url: string | null;
+  profile_photo_url: string | null;
+  background_photo_url: string | null;
 }
 
 export interface Photo {
