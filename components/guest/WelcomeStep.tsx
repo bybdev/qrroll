@@ -53,14 +53,14 @@ export function WelcomeStep({ wedding, guestName, onNameChange, onContinue }: We
             })}
           </p>
           <p className="text-lg text-gray-700">
-            Please Share your photos & videos with us for this special day! 💖
+            Lütfen bu özel gün için fotoğraflarınızı ve videolarınızı bizimle paylaşın! 💖
           </p>
         </div>
 
         <div className="space-y-4">
           <Input
-            label="Name"
-            placeholder="Enter your name"
+            label="Adınız"
+            placeholder="Adınızı giriniz"
             value={guestName}
             onChange={(e) => onNameChange(e.target.value)}
             required
@@ -71,7 +71,7 @@ export function WelcomeStep({ wedding, guestName, onNameChange, onContinue }: We
             disabled={!guestName.trim()}
             className="w-full text-lg py-4"
           >
-            Let's Go!
+            Haydi gidelim!
           </Button>
         </div>
       </Card>
