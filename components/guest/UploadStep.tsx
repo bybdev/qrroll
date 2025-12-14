@@ -70,7 +70,7 @@ export function UploadStep({ wedding, guestName, onBack, onUploadSuccess }: Uplo
             className="text-pink-600 font-medium flex items-center hover:text-pink-700 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
-            Back to album
+            Albüme geri dön
           </button>
           <h1 className="text-xl font-bold text-gray-800 mt-2 text-center">
             {wedding.bride_name} & {wedding.groom_name} Wedding
@@ -85,9 +85,9 @@ export function UploadStep({ wedding, guestName, onBack, onUploadSuccess }: Uplo
             <div className="border-4 border-dashed border-pink-300 rounded-xl p-12 text-center cursor-pointer hover:border-pink-500 transition-colors bg-white shadow-lg hover:shadow-xl">
               <Camera className="w-16 h-16 text-pink-400 mx-auto mb-4" />
               <p className="text-2xl font-bold text-pink-600 mb-2">
-                Pick Photos & Videos
+                Fotoğraf ve Video Seçin
               </p>
-              <p className="text-gray-600">Tap to select from your device</p>
+              <p className="text-gray-600">Cihazınızdan seçmek için dokunun.</p>
             </div>
             <input
               type="file"
@@ -110,12 +110,12 @@ export function UploadStep({ wedding, guestName, onBack, onUploadSuccess }: Uplo
             {/* Message */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Add a message (optional)
+               Mesaj ekle (isteğe bağlı)
               </label>
               <textarea
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                 rows={3}
-                placeholder="Write your wishes..."
+                placeholder="Dileklerinizi yazın..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 disabled={uploading}
@@ -139,7 +139,7 @@ export function UploadStep({ wedding, guestName, onBack, onUploadSuccess }: Uplo
                 disabled={uploading}
                 className="flex-1"
               >
-                Change Photo
+                Fotoğrafı Değiştir
               </Button>
               <Button
                 onClick={handleUpload}
@@ -149,12 +149,12 @@ export function UploadStep({ wedding, guestName, onBack, onUploadSuccess }: Uplo
                 {uploading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Uploading...
+                    Yükleniyor...
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload
+                    Yükle
                   </>
                 )}
               </Button>

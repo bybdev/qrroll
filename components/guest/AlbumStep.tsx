@@ -35,7 +35,7 @@ export function AlbumStep({ wedding, photos, guestName, onBack, onAddPhoto }: Al
               className="text-white/80 hover:text-white text-sm flex items-center transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
-              Change name
+              Adı değiştir
             </button>
             <div className="text-sm text-white/90 font-medium">
               {guestName}
@@ -67,13 +67,13 @@ export function AlbumStep({ wedding, photos, guestName, onBack, onAddPhoto }: Al
           className="w-full bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white font-bold py-6 rounded-2xl shadow-2xl mb-6 flex items-center justify-center text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <span className="text-3xl mr-3">+</span>
-          Add to album
+          Albüme ekle
         </button>
 
         {/* Photo Count */}
         <div className="mb-4 text-center">
           <h2 className="text-xl font-bold text-white drop-shadow-lg">
-            {photos.length} photos, videos & posts
+            {photos.length} fotoğraf, video ve gönderi
           </h2>
         </div>
 
@@ -82,7 +82,7 @@ export function AlbumStep({ wedding, photos, guestName, onBack, onAddPhoto }: Al
           <div className="text-center py-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl">
             <Camera className="w-20 h-20 text-white/60 mx-auto mb-4" />
             <p className="text-white/80 text-lg font-medium drop-shadow-md">
-              Be the first to share! 📸
+              İlk paylaşan siz olun! 📸
             </p>
           </div>
         ) : (
